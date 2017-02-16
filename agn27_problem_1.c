@@ -2,6 +2,8 @@
 //
 //Problem 1
 //
+//Compile with the command:     gcc agn27_problem_1.c -o problem_1_output
+//Then run with the command:    ./problem_1_output
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -49,8 +51,8 @@ float centroid_method_2(float **array, float *c, int N, int k){
     int i;
     int j;
     float cf = 0;
-    for(j=1; j!=N; j++){
-        for(i=1; i!=k; i++){
+    for(j=1; j!=k; j++){
+        for(i=1; i!=N; i++){
             c[j]=c[j]+array[i][j]; //building up the c_k array
             cf = cf+c[j];	       //summing up the values in c_k for the centroid value
         }
@@ -63,8 +65,8 @@ int main(){
     struct timespec start, end;
     uint64_t diff;
     
-    int N = pow(2,4);
-    int k = pow(2,4);
+    int N = 15;//pow(2,15);
+    int k = 15;//pow(2,15);
     float **array;
     int i;
     int j;
@@ -81,17 +83,22 @@ int main(){
     for(j =1; j!=N; j++){
             c_two[j] = 0;
         }
-
+    printf("Method one\n");
+    for(j=1; j!=15; j++){
     clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
     c_one_f = centroid_method_1(array, c_one, N, k);
     clock_gettime(CLOCK_MONOTONIC, &end);
     diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-    printf("elapsed time by method one = %llu nanoseconds\n", (long long unsigned int) diff);
+    printf("%llu\n", (long long unsigned int) diff);
+    }
 
+    printf("Method two\n");
+    for(j=1; j!=15; j++){
     clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
     c_two_f = centroid_method_2(array, c_two, N, k);
     clock_gettime(CLOCK_MONOTONIC, &end);
     diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-    printf("elapsed time by method two = %llu nanoseconds\n", (long long unsigned int) diff);
+    printf("%llu\n", (long long unsigned int) diff);
+}
     return 0;
 }
