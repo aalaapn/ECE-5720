@@ -40,22 +40,21 @@ int main() {
   int K = 10;
   int n = MIN_SIZE;
   float temp;
-  //FILE *fp;
-  //fp = fopen("problem2outputasdfasdf.txt", "w+");
+  FILE *fp;
+  fp = fopen("problem2output.txt", "w+"); //output data to this txt FILE
   for(n=MIN_SIZE; n<MAX_LENGTH; n=n*2){ //double the length of n
       for(stride = 1; stride<(n/2); stride = stride*2){ //double the length of the stride
         clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
-        for(j=0; j<(K); j++){
+        for(j=0; j<(stride*K); j++){
           for(h=0; h<n-1; h=h+stride){
             temp = A[h];
           }
         }
         clock_gettime(CLOCK_MONOTONIC, &end);
         diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-        printf("%f,", (float) diff/(K));
+        fprintf(fp, "%f\n", (float) diff/(K*stride));
       }
-  printf("\n-------n-------\n");
-  printf("---------------%d---------------\n", n);
+  fprintf(fp,"\n-------n-------\n");
   }
   //fclose(fp);
   printf("done\n");

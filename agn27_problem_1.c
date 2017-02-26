@@ -33,31 +33,29 @@ float** create_2D_int_array(int N, int k){
     }
 
 /*Row-wise method of iterating through the array*/
-float centroid_method_1(float **array, float *c, int N, int k){
+void centroid_method_1(float **array, float *c, int N, int k){
     int i;
     int j;
     float cf = 0;
     for(i=1; i!=N; i++){
         for(j=1; j!=k; j++){
           c[j]=c[j]+array[i][j]; //building up the c_k array
-          cf = cf+c[j]; 		 //summing up the values in c_k for the centroid value
+          //cf = cf+c[j]; 		 //summing up the values in c_k for the centroid value
         }
     }
-    return cf;
 }
 
 /*column-wise method of iterating through the array*/
-float centroid_method_2(float **array, float *c, int N, int k){
+void centroid_method_2(float **array, float *c, int N, int k){
     int i;
     int j;
     float cf = 0;
     for(j=1; j!=k; j++){
         for(i=1; i!=N; i++){
             c[j]=c[j]+array[i][j]; //building up the c_k array
-            cf = cf+c[j];	       //summing up the values in c_k for the centroid value
+            //cf = cf+c[j];	       //summing up the values in c_k for the centroid value
         }
     }
-    return cf/N;
 }
 
 int main(){
@@ -65,8 +63,8 @@ int main(){
     struct timespec start, end;
     uint64_t diff;
     
-    int N = 15;//pow(2,15);
-    int k = 15;//pow(2,15);
+    int N = 64;//pow(2,15);
+    int k = 64;//pow(2,15);
     float **array;
     int i;
     int j;
@@ -86,7 +84,7 @@ int main(){
     printf("Method one\n");
     for(j=1; j!=15; j++){
     clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
-    c_one_f = centroid_method_1(array, c_one, N, k);
+    centroid_method_1(array, c_one, N, k);
     clock_gettime(CLOCK_MONOTONIC, &end);
     diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
     printf("%llu\n", (long long unsigned int) diff);
@@ -95,7 +93,7 @@ int main(){
     printf("Method two\n");
     for(j=1; j!=15; j++){
     clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
-    c_two_f = centroid_method_2(array, c_two, N, k);
+    centroid_method_2(array, c_two, N, k);
     clock_gettime(CLOCK_MONOTONIC, &end);
     diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
     printf("%llu\n", (long long unsigned int) diff);
