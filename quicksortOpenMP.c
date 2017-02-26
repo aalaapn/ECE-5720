@@ -16,7 +16,7 @@ int** create_2D_int_array(int N, int k){
     int** arr = (int **)malloc(k * sizeof(int *));
     for (i=0; i<N; i++)
          arr[i] = (int*)malloc(N * sizeof(int));
-    srand((unsigned) time(&t));
+    srand(7);
     // fill up the array with random numbers
     for(i = 0; i < N; i++) {
         for(j = 0; j < k; j++) {

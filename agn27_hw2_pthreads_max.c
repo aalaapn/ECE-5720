@@ -17,7 +17,7 @@ the run with ./agn27_hw2_pthreads_max_out
 #include <pthread.h>
 
 #define BILLION 1000000000L //used to convert seconds to nano seconds
-#define NUM_THREADS 8
+#define NUM_THREADS 5
 
 struct thread_data{
     int **array;
@@ -33,7 +33,7 @@ int** create_2D_int_array(int N, int k){
     time_t t; //time used for generating random values
     int i, j; //iteration variables
     int fillNum; //number to store in array
-    srand((unsigned) time(&t));
+    srand(7);
 
     //allocating space for array
     int** arr = (int **)malloc(k * sizeof(int *));
@@ -117,10 +117,10 @@ int main(){
     uint64_t diff;
 
     //array dimensions
-    int N[30];
-    int k[30];
+    int N[11];
+    int k[11];
     int power;
-    for(power = 3; power<33; power++){
+    for(power = 3; power<14; power++){
         N[power-3] = (int)(pow(2,power));
         k[power-3] = (int)(pow(2,power));
     }
@@ -145,32 +145,29 @@ int main(){
     int i;
     int numThreads = NUM_THREADS;
 
-    for(power = 0; power<30; power++){
+    for(power = 0; power<11; power++){
         pthread_attr_init(&attr);
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-        printf("n is: %d, time is:", N[power]);
+        // printf("n is: %d, time is:", N[power]);
         array = create_2D_int_array(N[power], k[power]);
         numberOfRepsPerThread = (int)(N[power]/NUM_THREADS);
         clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
+        
         for(i=0; i<N[power]-1; i++){
             threadColumnStart = i;
-            while((int)((N[power]-i)/numThreads) ==0 ){
-                numThreads = numThreads - 1;
-            }
             numberOfRepsPerThread = (int)((N[power]-i)/numThreads);
-            for(j = 0; j<numberOfRepsPerThread; j++){
-                for(t= reps; t<numThreads; t++){
+                for(t= 0; t<numThreads; t++){
                     thread_data_array[t].array = array;
-                    thread_data_array[t].c = threadColumnStart+t;
+                    thread_data_array[t].c = threadColumnStart+i;
                     thread_data_array[t].n = k[power];
                     thread_data_array[t].start_index = i;
                     err = pthread_create(&threads[t], NULL, findLargestAndSwap, (void *)&thread_data_array[t]); 
                     if (err){ break;
                    }
+                   threadColumnStart = threadColumnStart + numberOfRepsPerThread;
                 }
-                threadColumnStart = threadColumnStart + numberOfRepsPerThread;
-            }
         }
+        
         clock_gettime(CLOCK_MONOTONIC, &end);
         diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
         printf("%llu\n", (long long unsigned int) diff);
