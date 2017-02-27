@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <omp.h>
+// #include <omp.h>
 #include <time.h> /* for clock_gettime */
 #include <stdint.h> /* for uint64 definition */
 #include <math.h>
@@ -16,7 +16,7 @@ int** create_2D_int_array(int N, int k){
     int** arr = (int **)malloc(k * sizeof(int *));
     for (i=0; i<N; i++)
          arr[i] = (int*)malloc(N * sizeof(int));
-    srand(7);
+    srand(9);
     // fill up the array with random numbers
     for(i = 0; i < N; i++) {
         for(j = 0; j < k; j++) {
@@ -27,111 +27,73 @@ int** create_2D_int_array(int N, int k){
     return arr;
     }
 
-void swapRow(int **array, int row1, int row2, int size){
-    int i;
-    int temp;
-    for(i = 0; i<size; i++){
-        temp = array[i][row1];
-        array[i][row1] = array[i][row2];
-        array[i][row2] = temp;
-    }
-}
-
-
-
-int partition(int * a, int p, int r)
-{
-    int lt[r-p];
-    int gt[r-p];
-    int i;
-    int j;
-    int key = a[r];
-    int lt_n = 0;
-    int gt_n = 0;
-
-#pragma omp parallel for
-    for(i = p; i < r; i++){
-        if(a[i] < a[r]){
-            lt[lt_n++] = a[i];
-        }else{
-            gt[gt_n++] = a[i];
-        }   
-    }   
-
-    for(i = 0; i < lt_n; i++){
-        a[p + i] = lt[i];
-    }   
-
-    a[p + lt_n] = key;
-
-    for(j = 0; j < gt_n; j++){
-        a[p + lt_n + j + 1] = gt[j];
-    }   
-
-    return p + lt_n;
-}
-
-void quicksort(int * a, int p, int r)
-{
-    int div;
-
-    if(p < r){ 
-        div = partition(a, p, r);
-#pragma omp parallel shared(a)
-#pragma omp sections
-        {   
-#pragma omp section
-            quicksort(a, p, div - 1); 
-#pragma omp section
-            quicksort(a, div + 1, r); 
-
+    //function to print out items in the array
+    void printArray(int **array, int N, int k){
+        printf("------array-begin--------\n");
+        int i;
+        int j;
+        int *temp;
+        int largest = 0;
+        int lIndex = 0;
+            for(i=0; i<N; i++){
+                for(j=0; j<k; j++){
+                printf("%d ", array[i][j]);
+                if(array[i][j]>largest){
+                    largest = array[i][j];
+                    lIndex = i;
+                }
+            }
+            printf("\n");
         }
+            printf("------array-end--------\n");
     }
-}
 
-
-
-int partition2(int * a, int p, int r)
-{
-    int lt[r-p];
-    int gt[r-p];
-    int i;
-    int j;
-    int key = a[r];
-    int lt_n = 0;
-    int gt_n = 0;
-    for(i = p; i < r; i++){
-        if(a[i] < a[r]){
-            lt[lt_n++] = a[i];
-        }else{
-            gt[gt_n++] = a[i];
-        }   
-    }   
-
-    for(i = 0; i < lt_n; i++){
-        a[p + i] = lt[i];
-    }   
-
-    a[p + lt_n] = key;
-
-    for(j = 0; j < gt_n; j++){
-        a[p + lt_n + j + 1] = gt[j];
-    }   
-
-    return p + lt_n;
-}
-
-void quicksort2(int * a, int p, int r)
-{
-    int div;
-
-    if(p < r){ 
-        div = partition2(a, p, r); 
-        quicksort2(a, p, div - 1); 
-        quicksort2(a, div + 1, r); 
-
+void sort(int **arr, int N){
+  int row,col, iter;
+  row =N;
+  col = N;
+  int i,j,k=0,x,temp;
+  for(iter = 0; iter<N; iter++){
+    k=iter;
+    for(i=iter;i<row;i++){
+      for(j=i+1;j<row;j++){
+        if(arr[i][k] > arr[j][k]){
+          for(x=iter;x<N;x++){
+            temp=arr[i][x];
+            arr[i][x]=arr[j][x];
+            arr[j][x]=temp;
+          }
+        }
+      }
     }
+  }
 }
+
+//
+// void sortOMP(int **arr, int N){
+//   int row,col, iter;
+//   row =N;
+//   col = N;
+//   int i,j,k=0,x,temp;
+// #pragma omp parallel shared(arr, N,)
+//   for(iter = 0; iter<N; iter++){
+//     k=iter;
+//     #pragma omp parallel
+//     for(i=iter;i<row;i++){
+//     #pragma omp parallel
+//       for(j=i+1;j<row;j++){
+//         if(arr[i][k] > arr[j][k]){
+//         #pragma omp parallel
+//           for(x=iter;x<N;x++){
+//             temp=arr[i][x];
+//             arr[i][x]=arr[j][x];
+//             arr[j][x]=temp;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
 
 
 int main(void){
@@ -139,28 +101,33 @@ int main(void){
     uint64_t diff;
 
     int **a;
-    int **b;
-    int N = pow(2,15);
-    a = create_2D_int_array(N,N);
-    b = create_2D_int_array(N,N);
+    int **arr;
+    //array dimensions
+    int N[11];
+    int k[11];
+    int power;
+    for(power = 3; power<14; power++){
+        N[power-3] = (int)(pow(2,power));
+        k[power-3] = (int)(pow(2,power));
+    }
 
-    printf("================\n");
-    int i= 0;
-    clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
-    quicksort(a[i], 6, 9);
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-    printf("%llu\n", (long long unsigned int) diff);
+    for(power = 0; power<11; power++){
+      arr = create_2D_int_array(N[power], k[power]);
+    // printf("================\n");
+    // clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
+    // quicksort(a[i], 6, 9);
+    // clock_gettime(CLOCK_MONOTONIC, &end);
+    // diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+    // printf("%llu\n", (long long unsigned int) diff);
+    //    clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
 
-
-    clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
-    quicksort2(b[i], 6, 9);
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-    printf("%llu\n", (long long unsigned int) diff);
-
-    printf("--------------\n");
-    free(a);
-    free(b);
-    return 0;
+        clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
+        sort(arr, N[power]);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
+        printf("%llu\n", (long long unsigned int) diff);
+        printf("--------------\n");
+        free(arr);
+    }
+            return 0;
 }
