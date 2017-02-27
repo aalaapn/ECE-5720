@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-// #include <omp.h>
+#include <omp.h>
 #include <time.h> /* for clock_gettime */
 #include <stdint.h> /* for uint64 definition */
 #include <math.h>
@@ -75,15 +75,13 @@ void sortOMP(int **arr, int N){
   row =N;
   col = N;
   int i,j,k=0,x,temp;
-#pragma omp parallel shared(arr, N,)
   for(iter = 0; iter<N; iter++){
     k=iter;
-    #pragma omp parallel
     for(i=iter;i<row;i++){
-    #pragma omp parallel
+#pragma omp parallel for        
       for(j=i+1;j<row;j++){
         if(arr[i][k] > arr[j][k]){
-        #pragma omp parallel
+#pragma omp parallel for        
           for(x=iter;x<N;x++){
             temp=arr[i][x];
             arr[i][x]=arr[j][x];
@@ -111,11 +109,11 @@ int main(void){
         k[power-3] = (int)(pow(2,power));
     }
 
-    for(power = 0; power<11; power++){
+    for(power = 10; power<11; power++){
       arr = create_2D_int_array(N[power], k[power]);
         clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
-        //sortOMP(arr, N[power]);
-        sort(arr, N[power]);
+        sortOMP(arr, N[power]);
+        //sort(arr, N[power]);
         clock_gettime(CLOCK_MONOTONIC, &end);
         diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
         printf("%llu\n", (long long unsigned int) diff);

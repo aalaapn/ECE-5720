@@ -17,7 +17,7 @@ the run with ./agn27_hw2_pthreads_max_out
 #include <pthread.h>
 
 #define BILLION 1000000000L //used to convert seconds to nano seconds
-#define NUM_THREADS 5
+#define NUM_THREADS 12
 
 struct thread_data{
     int **array;
