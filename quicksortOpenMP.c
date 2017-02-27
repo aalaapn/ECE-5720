@@ -69,31 +69,31 @@ void sort(int **arr, int N){
   }
 }
 
-//
-// void sortOMP(int **arr, int N){
-//   int row,col, iter;
-//   row =N;
-//   col = N;
-//   int i,j,k=0,x,temp;
-// #pragma omp parallel shared(arr, N,)
-//   for(iter = 0; iter<N; iter++){
-//     k=iter;
-//     #pragma omp parallel
-//     for(i=iter;i<row;i++){
-//     #pragma omp parallel
-//       for(j=i+1;j<row;j++){
-//         if(arr[i][k] > arr[j][k]){
-//         #pragma omp parallel
-//           for(x=iter;x<N;x++){
-//             temp=arr[i][x];
-//             arr[i][x]=arr[j][x];
-//             arr[j][x]=temp;
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
+
+void sortOMP(int **arr, int N){
+  int row,col, iter;
+  row =N;
+  col = N;
+  int i,j,k=0,x,temp;
+#pragma omp parallel shared(arr, N,)
+  for(iter = 0; iter<N; iter++){
+    k=iter;
+    #pragma omp parallel
+    for(i=iter;i<row;i++){
+    #pragma omp parallel
+      for(j=i+1;j<row;j++){
+        if(arr[i][k] > arr[j][k]){
+        #pragma omp parallel
+          for(x=iter;x<N;x++){
+            temp=arr[i][x];
+            arr[i][x]=arr[j][x];
+            arr[j][x]=temp;
+          }
+        }
+      }
+    }
+  }
+}
 
 
 int main(void){
@@ -113,21 +113,14 @@ int main(void){
 
     for(power = 0; power<11; power++){
       arr = create_2D_int_array(N[power], k[power]);
-    // printf("================\n");
-    // clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
-    // quicksort(a[i], 6, 9);
-    // clock_gettime(CLOCK_MONOTONIC, &end);
-    // diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
-    // printf("%llu\n", (long long unsigned int) diff);
-    //    clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
-
         clock_gettime(CLOCK_MONOTONIC, &start); /* mark start time */
+        //sortOMP(arr, N[power]);
         sort(arr, N[power]);
         clock_gettime(CLOCK_MONOTONIC, &end);
         diff = BILLION * (end.tv_sec - start.tv_sec) + end.tv_nsec - start.tv_nsec;
         printf("%llu\n", (long long unsigned int) diff);
-        printf("--------------\n");
         free(arr);
     }
-            return 0;
+    printf("--------------\n");
+    return 0;
 }
